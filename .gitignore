@@ -9,7 +9,6 @@ auth.php
 auth/
 bitrix/
 content/
-core/
 e-store/
 examples/
 favicon.ico

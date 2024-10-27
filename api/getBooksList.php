@@ -32,7 +32,7 @@ foreach($arBooks as $book){
     $arResult["items"][$i]["name"] = $book["NAME"];
     $arResult["items"][$i]["author"] = $bookAuthors[$book["ID"]];
     $arResult["items"][$i]["published"] = $book["PUBLISHED"];
-    if($_REQUEST["user"] == "admin" && $book["AVAILABLE"] == "N"){
+    if($userLogin == ADMIN_LOGIN && $userPassword == ADMIN_PASSWORD && $book["AVAILABLE"] == "N"){
         $arResult["items"][$i]["available"] = $book["AVAILABLE"];
         $arResult["items"][$i]["user"] = $book["USER"];
     } else {
@@ -41,6 +41,7 @@ foreach($arBooks as $book){
     
     $i++;
 }
+
 
 if(!$arResult["items"]){
     $arResult["message"] = 'Записей не найдено';

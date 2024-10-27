@@ -6,54 +6,60 @@ use Bitrix\Books\BooksTable,
     Bitrix\Authors\AuthorsTable,
     Bitrix\Write\WriteTable;
 
-$data = json_decode(file_get_contents('php://input'), true);
+if($userLogin == ADMIN_LOGIN && $userPassword == ADMIN_PASSWORD){
 
-$res = BooksTable::getList(array(
-    'select' => array('ID', 'NAME', 'PUBLISHED', 'AVAILABLE'),
-    'filter' => array('NAME' => $data["name"]), 
-    'limit' => 10, 
-    // 'offset' => $offset
-));
-if($arr = $res->fetch()) {
-    $arResult["message"] = 'книга уже существует';
-    $arResult["status"] = false;
-} else {
-    if($data["name"] && $data["published"] && $data["author"]){
-        $bookId = BooksTable::add(array(
-            'NAME' => $data["name"],
-            'PUBLISHED' => $data["published"],
-            'AVAILABLE' => 'Y',
-        ))->getId();
-    
-        if($bookId){
-            $res = AuthorsTable::getList(array(
-                'select' => array('ID', 'NAME'),
-                'filter' => array('NAME' => $data["author"]),
-                'limit' => 1
-            ));
-            if($arr = $res->fetch()) {
-                $authorId = $arr["ID"];
-            } else {
-                $authorId = AuthorsTable::add(array(
-                    'NAME' => $data["author"],
-                ))->getId();
-            }
-        }
-    
-        if($bookId && $authorId){
-            $authorId = WriteTable::add(array(
-                'BOOK_ID' => $bookId,
-                'AUTHOR_ID' => $authorId
-            ));
-        }
-    
-        $arResult["message"] = 'Книга успешно добавлена';
-        $arResult["status"] = true;
+    $data = json_decode(file_get_contents('php://input'), true);
+    $res = BooksTable::getList(array(
+        'select' => array('ID', 'NAME', 'PUBLISHED', 'AVAILABLE'),
+        'filter' => array('NAME' => $data["name"]), 
+        'limit' => 10, 
+        // 'offset' => $offset
+    ));
+    if($arr = $res->fetch()) {
+        $arResult["message"] = $MESSAGES[208];
+        $CODE = 208;
     } else {
-    
-        $arResult["message"] = 'отсутствуют обязательные данные name и published';
-        $arResult["status"] = false;
+        if($data["name"] && $data["published"] && $data["author"]){
+            $bookId = BooksTable::add(array(
+                'NAME' => $data["name"],
+                'PUBLISHED' => $data["published"],
+                'AVAILABLE' => 'Y',
+            ))->getId();
+        
+            if($bookId){
+                $res = AuthorsTable::getList(array(
+                    'select' => array('ID', 'NAME'),
+                    'filter' => array('NAME' => $data["author"]),
+                    'limit' => 1
+                ));
+                if($arr = $res->fetch()) {
+                    $authorId = $arr["ID"];
+                } else {
+                    $authorId = AuthorsTable::add(array(
+                        'NAME' => $data["author"],
+                    ))->getId();
+                }
+            }
+        
+            if($bookId && $authorId){
+                $authorId = WriteTable::add(array(
+                    'BOOK_ID' => $bookId,
+                    'AUTHOR_ID' => $authorId
+                ));
+            }
+        
+            $arResult["message"] = $MESSAGES[200];
+            $CODE = 200;
+        } else {
+            $arResult["message"] = $MESSAGES[204];
+            $CODE = 204;
+        }
     }
+} elseif(!$userLogin && !$userPassword) {
+    $arResult["message"] = $MESSAGES[401];
+    $CODE = 401;
+} else {
+    $arResult["message"] = $MESSAGES[403];
+    $CODE = 403;
 }
-
 ?>

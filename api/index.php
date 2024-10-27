@@ -1,5 +1,6 @@
 <?
 require_once($_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/main/include/prolog_before.php");
+
 if($_REQUEST["METHOD"]){
     header("Access-Control-Allow-Origin: *");
     header("Content-Type: application/json; charset=UTF-8");
@@ -8,7 +9,7 @@ if($_REQUEST["METHOD"]){
 
         $method = explode('?', $_REQUEST["METHOD"]);
         require_once $method[0].'.php';
-        http_response_code(200);
+        http_response_code($CODE);
         echo json_encode($arResult);
 
     } catch (Error $e) {

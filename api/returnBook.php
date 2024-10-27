@@ -7,35 +7,44 @@ use Bitrix\Books\BooksTable,
 
 $data = json_decode(file_get_contents('php://input'), true);    
 
-if(is_numeric($data["id"])){
-    $res = BooksTable::getList(array(
-        'select' => array('ID', 'NAME', 'PUBLISHED', 'AVAILABLE', 'USER'),
-        'filter' => array('ID' => $data["id"]),
-        'order' => array('NAME' => 'ASC'), 
-    ));
+if($userLogin && $userPassword){
+    if(is_numeric($data["id"])){
+        $res = BooksTable::getList(array(
+            'select' => array('ID', 'NAME', 'PUBLISHED', 'AVAILABLE', 'USER'),
+            'filter' => array('ID' => $data["id"]),
+            'order' => array('NAME' => 'ASC'), 
+        ));
 
-    
-    if($book = $res->fetch()) {
-        if($book["AVAILABLE"] == "N" && $book["USER"] == $_REQUEST["user"]){
-            
-            $res = BooksTable::update($data["id"], array(
-                'AVAILABLE' => "Y",
-                'USER' => '',
-            ));
         
-            // $arResult["error"] = $res->getErrorMessages();
-            $arResult["message"] = 'Книга успешно возвращена';
-            $arResult["status"] = true;
-        } else {
-            if($book["USER"] != $_REQUEST["user"] || !$_REQUEST["user"]){
-                $arResult["message"] = 'У вас нет доступа к операциям с этой книгой';
+        if($book = $res->fetch()) {
+            if($book["AVAILABLE"] == "N" && $book["USER"] == $userLogin){
+                
+                $res = BooksTable::update($data["id"], array(
+                    'AVAILABLE' => "Y",
+                    'USER' => '',
+                ));
+            
+
+                $arResult["message"] = $MESSAGES[200];
                 $arResult["status"] = true;
+                $CODE = 200;
+            } else {
+                if($book["USER"] != $userLogin){
+                    $arResult["message"] = $MESSAGES[403];
+                    $arResult["status"] = true;
+                    $CODE = 403;
+                }
             }
         }
-    }
 
+    } else {
+        $arResult["message"] = $MESSAGES[403];
+        $arResult["status"] = true;
+        $CODE = 403;
+    }
 } else {
-    $$arResult["message"] = 'Неверный формат id';
+    $arResult["message"] = $MESSAGES[401];
     $arResult["status"] = false;
-}
+    $CODE = 401;
+}  
 ?>
