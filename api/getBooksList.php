@@ -9,7 +9,8 @@ use Bitrix\Books\BooksTable,
 
 try {
     $res = BooksTable::getList(array(
-        'select' => array('ID', 'NAME', 'PUBLISHED', 'AVAILABLE'),
+        'select' => array('ID', 'NAME', 'PUBLISHED', 'AVAILABLE', 'USER'),
+        // 'filter' => array('AVAILABLE' => "Y"),
         'order' => array('NAME' => 'ASC'), 
         'limit' => 10, 
         // 'offset' => $offset
@@ -23,36 +24,7 @@ try {
    $MESSAGE = $e->getMessage();
 }
 
-
-if($booksId){
-    $res = WriteTable::getList(array(
-        'select' => array('BOOK_ID', 'AUTHOR_ID'),
-        'filter' => array('BOOK_ID' => $booksId),
-    ));
-    
-    while ($arr = $res->fetch()) {
-        $arWrite[$arr["BOOK_ID"]][] = $arr["AUTHOR_ID"];
-        $writeId[] = $arr["AUTHOR_ID"];
-    }
-}
-
-
-if($writeId){
-    $res = AuthorsTable::getList(array(
-        'select' => array('ID', 'NAME'),
-        'filter' => array('ID' => array_unique($writeId)),
-    ));
-    
-    while ($arr = $res->fetch()) {
-        $arAuthor[$arr["ID"]] = $arr;
-    }
-}
-
-foreach($arWrite as $key=>$write){
-    foreach($write as $item){
-        $bookAuthors[$key][] = $arAuthor[$item]["NAME"];
-    }
-}
+$bookAuthors = ApiCore::getAuthorByBookId($booksId);
 
 $i = 0;
 foreach($arBooks as $book){
@@ -60,6 +32,13 @@ foreach($arBooks as $book){
     $arResult["items"][$i]["name"] = $book["NAME"];
     $arResult["items"][$i]["author"] = $bookAuthors[$book["ID"]];
     $arResult["items"][$i]["published"] = $book["PUBLISHED"];
+    if($_REQUEST["user"] == "admin" && $book["AVAILABLE"] == "N"){
+        $arResult["items"][$i]["available"] = $book["AVAILABLE"];
+        $arResult["items"][$i]["user"] = $book["USER"];
+    } else {
+        $arResult["items"][$i]["available"] = $book["AVAILABLE"];
+    }
+    
     $i++;
 }
 

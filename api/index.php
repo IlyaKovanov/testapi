@@ -6,7 +6,8 @@ if($_REQUEST["METHOD"]){
 
     try{
 
-        require_once $_REQUEST["METHOD"].'.php';
+        $method = explode('?', $_REQUEST["METHOD"]);
+        require_once $method[0].'.php';
         http_response_code(200);
         echo json_encode($arResult);
 

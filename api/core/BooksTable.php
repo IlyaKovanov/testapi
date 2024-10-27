@@ -18,6 +18,7 @@ Loc::loadMessages(__FILE__);
  * <li> NAME string(255) mandatory
  * <li> PUBLISHED int mandatory
  * <li> AVAILABLE string(1) mandatory
+ * <li> USER string(255) mandatory
  * </ul>
  *
  * @package Bitrix\Books
@@ -74,6 +75,14 @@ class BooksTable extends DataManager
 					'title' => Loc::getMessage('BOOKS_ENTITY_AVAILABLE_FIELD')
 				]
 			),
+			new StringField(
+				'USER',
+				[
+					'required' => false,
+					'validation' => [__CLASS__, 'validateUser'],
+					'title' => Loc::getMessage('BOOKS_ENTITY_USER_FIELD')
+				]
+			),
 		];
 	}
 
@@ -98,6 +107,18 @@ class BooksTable extends DataManager
 	{
 		return [
 			new LengthValidator(null, 1),
+		];
+	}
+
+	/**
+	 * Returns validators for USER field.
+	 *
+	 * @return array
+	 */
+	public static function validateUser()
+	{
+		return [
+			new LengthValidator(null, 255),
 		];
 	}
 }
