@@ -24,7 +24,40 @@ if($userLogin == ADMIN_LOGIN && $userPassword == ADMIN_PASSWORD){
                 'PUBLISHED' => $data["published"],
                 'AVAILABLE' => 'Y',
             ))->getId();
+
+            if($bookId){
+                $res = AuthorsTable::getList(array(
+                    'select' => array('ID', 'NAME'),
+                    'filter' => array('NAME' => $data["author"]),
+                ));
+                
+                while($arr = $res->fetch()) {
+                    $authorId[] = $arr["ID"];
+                    $authorName[] = base64_encode($arr["NAME"]);
+                } 
+                
+                if(!$authorId || count($authorId) != count($data["author"])){
+                    foreach($data["author"] as $author){
+                        if($authorName && !in_array(base64_encode($author), $authorName) || !$authorName){
+                            $authorId[] = AuthorsTable::add(array(
+                                'NAME' => $author,
+                            ))->getId();
+                        }
+                    }
+                }
+            }
+            
+            if($bookId && $authorId){
+                foreach($authorId as $value){
+                    $authorRes = WriteTable::add(array(
+                        'BOOK_ID' => $bookId,
+                        'AUTHOR_ID' => $value
+                    ));
+                }
+            }
         
+           
+           /*
             if($bookId){
                 $res = AuthorsTable::getList(array(
                     'select' => array('ID', 'NAME'),
@@ -46,6 +79,8 @@ if($userLogin == ADMIN_LOGIN && $userPassword == ADMIN_PASSWORD){
                     'AUTHOR_ID' => $authorId
                 ));
             }
+
+            */
         
             $arResult["message"] = $MESSAGES[200];
             $CODE = 200;
