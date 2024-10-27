@@ -1,51 +1,24 @@
 <?
 require_once($_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/main/include/prolog_before.php");
-require_once 'core/BooksTable.php';
-require_once 'core/AuthorsTable.php';
-require_once 'core/WriteTable.php';
+if($_REQUEST["METHOD"]){
+    header("Access-Control-Allow-Origin: *");
+    header("Content-Type: application/json; charset=UTF-8");
 
-use \Bitrix\Books\BooksTable,
-    \Bitrix\Authors\AuthorsTable,
-    Bitrix\Write\WriteTable;
+    try{
 
+        require_once $_REQUEST["METHOD"].'.php';
+        http_response_code(200);
+        echo json_encode($arResult);
 
-$res = BooksTable::getList(array(
-    'select' => array('ID', 'NAME', 'PUBLISHED', 'AVAILABLE'),
-    'limit' => 10, 
-));
+    } catch (Error $e) {
 
-while ($arr = $res->fetch()) {
-    $arBooks[] = $arr;
-    $booksId[] = $arr["ID"];
+        http_response_code(500);
+        $arResult["message"] = 'unknown request '.$e->GetMessage();
+        $arResult["status"] = false;
+        echo json_encode($arResult);
+
+    }
+    
 }
-
-$res = WriteTable::getList(array(
-    'select' => array('BOOK_ID', 'AUTHOR_ID'),
-    'filter' => array('BOOK_ID' => $booksId),
-));
-
-while ($arr = $res->fetch()) {
-    $arWrite[$arr["BOOK_ID"]] = $arr["AUTHOR_ID"];
-}
-
-
-$res = AuthorsTable::getList(array(
-    'select' => array('ID', 'NAME'),
-    'filter' => array('ID' => $arWrite),
-));
-
-while ($arr = $res->fetch()) {
-    $arAuthor[$arr["ID"]] = $arr;
-}
-
-
-$arResult = [];
-
-header("Access-Control-Allow-Origin: *");
-header("Content-Type: application/json; charset=UTF-8");
-
-
-echo json_encode($arResult);
-
 
 ?>
