@@ -12,9 +12,8 @@ if($userLogin == ADMIN_LOGIN && $userPassword == ADMIN_PASSWORD){
     $res = BooksTable::getList(array(
         'select' => array('ID', 'NAME', 'PUBLISHED', 'AVAILABLE'),
         'filter' => array('NAME' => $data["name"]), 
-        'limit' => 10, 
-        // 'offset' => $offset
     ));
+
     if($arr = $res->fetch()) {
         $arResult["message"] = $MESSAGES[208];
         $CODE = 208;
@@ -33,7 +32,7 @@ if($userLogin == ADMIN_LOGIN && $userPassword == ADMIN_PASSWORD){
                     'limit' => 1
                 ));
                 if($arr = $res->fetch()) {
-                    $authorId = $arr["ID"];
+                    $authorId[] = $arr["ID"];
                 } else {
                     $authorId = AuthorsTable::add(array(
                         'NAME' => $data["author"],
@@ -42,7 +41,7 @@ if($userLogin == ADMIN_LOGIN && $userPassword == ADMIN_PASSWORD){
             }
         
             if($bookId && $authorId){
-                $authorId = WriteTable::add(array(
+                $authorRes = WriteTable::add(array(
                     'BOOK_ID' => $bookId,
                     'AUTHOR_ID' => $authorId
                 ));

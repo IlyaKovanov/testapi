@@ -62,12 +62,12 @@ if($userLogin == ADMIN_LOGIN && $userPassword == ADMIN_PASSWORD){
             $arResult["author"] = $bookAuthors[$arBook["ID"]];
             $arResult["published"] = $arBook["PUBLISHED"];
         } else {
-            $arResult["message"] = 'Запись не найдена';
-            $arResult["status"] = false;
+            $arResult["message"] = $MESSAGES[404];
+            $CODE = 404;
         }
     } else {
-        $arResult["message"] = 'Неверный формат id';
-        $arResult["status"] = false;
+        $arResult["message"] = $MESSAGES[404];
+        $CODE = 404;
     }
 } elseif(!$userLogin && !$userPassword) {
     $arResult["message"] = $MESSAGES[401];

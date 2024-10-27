@@ -16,7 +16,6 @@ if($_REQUEST["METHOD"]){
 
         http_response_code(500);
         $arResult["message"] = 'unknown request '.$e->GetMessage();
-        $arResult["status"] = false;
         echo json_encode($arResult);
 
     }

@@ -10,19 +10,31 @@ if($userLogin == ADMIN_LOGIN && $userPassword == ADMIN_PASSWORD){
     $data = json_decode(file_get_contents('php://input'), true);
 
     if(is_numeric($data["id"])){
-        BooksTable::delete($data["id"]);
-
-        $res = WriteTable::getList(array(
-            'select' => array('ID', 'BOOK_ID'),
-            'filter' => array('BOOK_ID' => $data["id"]),
+        $res = BooksTable::getList(array(
+            'select' => array('ID', 'NAME', 'PUBLISHED', 'AVAILABLE'),
+            'filter' => array('ID' => $data["id"]),
+            'order' => array('NAME' => 'ASC'), 
         ));
         
-        while($arr = $res->fetch()) {
-            WriteTable::delete($arr["ID"]);
-        }
+        if($arr = $res->fetch()) {
+            BooksTable::delete($data["id"]);
 
-        $arResult["message"] = $MESSAGES[200];
-        $CODE = 200;
+            $res = WriteTable::getList(array(
+                'select' => array('ID', 'BOOK_ID'),
+                'filter' => array('BOOK_ID' => $data["id"]),
+            ));
+            
+            while($arr = $res->fetch()) {
+                WriteTable::delete($arr["ID"]);
+            }
+
+            $arResult["message"] = $MESSAGES[200];
+            $CODE = 200;
+        } else {
+            $arResult["message"] = $MESSAGES[404];
+            $CODE = 404;
+        }
+        
     } else {
         $arResult["message"] = $MESSAGES[404];
         $CODE = 404;
